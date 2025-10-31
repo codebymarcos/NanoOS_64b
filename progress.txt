@@ -1,0 +1,47 @@
+O que temos no projeto (estado atual):
+
+- [x] Makefile com targets principais: `all`, `iso`, `run`, `run-iso`, `clean`
+- [x] Fonte de boot em `src/boot.asm` com Multiboot2 header, inicialização de paginação e rotina de entrada em 64-bit (chama `_start` -> `kernel_main`).
+- [x] Script de link `linker.ld` configurado para layout do kernel (seções .boot, .text, .rodata, .data, .bss) e ENTRY(_start).
+- [x] Código do kernel em `src/kernel.c` com:
+  - driver serial (COM1) completo e inicialização (`serial_init`, transmit/receive)
+  - funções de I/O (`print`, `println`)
+  - loop de input via serial com buffer protegido (50 chars) e echo
+  - banner e informações básicas do sistema
+- [x] Template/arquivo GRUB em `iso/boot/grub/grub.cfg` gerado pelo Makefile para criar ISO bootável
+- [x] Targets produzem artefatos: `kernel.bin` e `kernel.iso` (quando `make iso` é executado e ferramentas instaladas)
+
+Passo a passo simplificado (próximas tarefas acionáveis):
+
+1. Parser Multiboot2 e mapa físico
+	- [ ] O que: implementar `src/mem/multiboot.c` para ler tags Multiboot2 e construir vetor de regiões {start, length, type}.
+	- Como testar: imprimir as regiões via serial no boot.
+	- Critério: lista correta de regiões aparece na serial ao rodar `make run-iso`.
+
+2. Alocador físico mínimo (páginas)
+	- [ ] O que: implementar `src/mem/phys_alloc.c` com `phys_alloc_page()` e `phys_free_page()` (bitmap ou buddy mínimo).
+	- Como testar: alocar N páginas, escrever padrão, liberar e realocar; relatar via serial.
+
+3. Helpers de tabelas de página
+	- [ ] O que: implementar `src/mem/page_table.c` com `map_page()`/`unmap_page()`/`vaddr_to_paddr()` (4KiB; 2MiB opcional).
+	- Como testar: mapear vaddr->paddr, escrever/ler e validar.
+
+4. Heap do kernel (kmalloc/kfree) básico
+	- [ ] O que: implementar `src/mem/heap.c` que usa `phys_alloc_page()` como backend e provê `kmalloc`/`kfree`.
+	- Como testar: alocar muitos blocos variados e verificar integridade via serial.
+
+5. Handler de page fault básico
+	- [ ] O que: implementar handler que loga razão do fault e endereço faltante; opcionalmente alocar-on-demand.
+	- Como testar: acessar página não mapeada e checar mensagem via serial.
+
+6. Testes e harness (QEMU + serial)
+	- [ ] O que: criar scripts em `tests/mem/` que constroem kernel, rodam QEMU e comparam saída serial com esperado.
+
+7. Docs e limpeza
+	- [ ] O que: finalizar `src/mem/README.md`, adicionar `.gitignore` (ignorar `kernel.bin`, `kernel.iso`, `*.o`) e documentar como rodar os testes.
+
+Observações:
+- O `Makefile` já avisa sobre dependências para `grub-mkrescue` (pacotes `grub-pc-bin` e `xorriso` no Linux/WSL).
+- Para testes locais com serial, use `make run-iso` (QEMU configurado pelo Makefile).
+
+Última atualização: 2025-10-31
