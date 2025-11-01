@@ -3,12 +3,12 @@ CC = gcc
 AS = nasm
 LD = ld
 
-CFLAGS = -ffreestanding -m64 -nostdlib -Isrc -O2 -fno-stack-protector -fno-pie
+CFLAGS = -ffreestanding -m64 -nostdlib -Isrc -Isrc/commands -O2 -fno-stack-protector -fno-pie
 ASFLAGS = -f elf64
 LDFLAGS = -n -T linker.ld
 
-SRCS = src/boot.asm src/kernel.c src/mem/multiboot.c src/mem/phys_alloc.c
-OBJS = src/boot.o src/kernel.o src/mem/multiboot.o src/mem/phys_alloc.o
+SRCS = src/boot.asm src/kernel.c src/mem/multiboot.c src/mem/phys_alloc.c src/mem/page_table.c src/commands/commands.c src/commands/cd.c src/commands/ls.c src/commands/echo.c src/commands/help.c src/commands/exit.c
+OBJS = src/boot.o src/kernel.o src/mem/multiboot.o src/mem/phys_alloc.o src/mem/page_table.o src/commands/commands.o src/commands/cd.o src/commands/ls.o src/commands/echo.o src/commands/help.o src/commands/exit.o
 
 .PHONY: all clean run
 
@@ -31,6 +31,34 @@ src/mem/multiboot.o: src/mem/multiboot.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 src/mem/phys_alloc.o: src/mem/phys_alloc.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/mem/page_table.o: src/mem/page_table.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/commands.o: src/commands/commands.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/cd.o: src/commands/cd.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/ls.o: src/commands/ls.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/echo.o: src/commands/echo.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/help.o: src/commands/help.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/exit.o: src/commands/exit.c
 	@echo "Compilando $<..."
 	$(CC) $(CFLAGS) -c -o $@ $<
 

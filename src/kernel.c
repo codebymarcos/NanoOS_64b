@@ -133,9 +133,13 @@ void kernel_main(uint64_t mb_info) {
             input[index] = '\0';
             print("\r\nVoce digitou: ");
             print(input);
-            print("\r\n\r\nDigite algo: ");
+            print("\r\n");
+            /* Executar comando */
+            extern int execute_command(const char *cmd_line);
+            execute_command(input);
             clear_buffer(input, BUFFER_SIZE + 1);
             index = 0;
+            print("Digite algo: ");
         }
         // Caractere imprimível
         else if (c >= 32 && c <= 126) {

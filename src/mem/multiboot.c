@@ -12,7 +12,7 @@ extern void print(const char* str);
 extern void serial_putchar(char c);
 
 /* helper simples: imprime uint64 em hex (sem dependências) */
-static void print_hex_u64(uint64_t v) {
+void print_hex_u64(uint64_t v) {
     char buf[19]; /* 0x + 16 hex + \0 */
     buf[0] = '0'; buf[1] = 'x';
     for (int i = 0; i < 16; i++) {
