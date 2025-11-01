@@ -13,4 +13,8 @@ uint64_t phys_alloc_page(void);
 /* Libera uma página previamente alocada. */
 void phys_free_page(uint64_t paddr);
 
+/* Stats da memória */
+uint64_t phys_get_total_pages(void);
+uint64_t phys_get_free_pages(void);
+
 #endif /* PHYS_ALLOC_H */

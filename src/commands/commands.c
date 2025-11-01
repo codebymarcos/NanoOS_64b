@@ -63,6 +63,9 @@ int cmd_ls(int argc, char *argv[]);
 int cmd_echo(int argc, char *argv[]);
 int cmd_help(int argc, char *argv[]);
 int cmd_exit(int argc, char *argv[]);
+int cmd_mem(int argc, char *argv[]);
+int cmd_readsector(int argc, char *argv[]);
+int cmd_info(int argc, char *argv[]);
 
 /* Lista de comandos */
 command_t commands[] = {
@@ -70,7 +73,10 @@ command_t commands[] = {
     {"ls", cmd_ls, "Lista arquivos no diretório"},
     {"echo", cmd_echo, "Imprime argumentos"},
     {"help", cmd_help, "Mostra ajuda"},
-    {"exit", cmd_exit, "Sai do kernel"}
+    {"exit", cmd_exit, "Sai do kernel"},
+    {"mem", cmd_mem, "Mostra informações de memória"},
+    {"readsector", cmd_readsector, "Lê um setor do disco"},
+    {"info", cmd_info, "Mostra informações do sistema"}
 };
 
 const int num_commands = sizeof(commands) / sizeof(commands[0]);

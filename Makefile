@@ -3,12 +3,12 @@ CC = gcc
 AS = nasm
 LD = ld
 
-CFLAGS = -ffreestanding -m64 -nostdlib -Isrc -Isrc/commands -O2 -fno-stack-protector -fno-pie
+CFLAGS = -ffreestanding -m64 -nostdlib -Isrc -Isrc/commands -Isrc/drivers -Isrc/ui -O2 -fno-stack-protector -fno-pie
 ASFLAGS = -f elf64
 LDFLAGS = -n -T linker.ld
 
-SRCS = src/boot.asm src/kernel.c src/mem/multiboot.c src/mem/phys_alloc.c src/mem/page_table.c src/commands/commands.c src/commands/cd.c src/commands/ls.c src/commands/echo.c src/commands/help.c src/commands/exit.c
-OBJS = src/boot.o src/kernel.o src/mem/multiboot.o src/mem/phys_alloc.o src/mem/page_table.o src/commands/commands.o src/commands/cd.o src/commands/ls.o src/commands/echo.o src/commands/help.o src/commands/exit.o
+SRCS = src/boot.asm src/kernel.c src/mem/multiboot.c src/mem/phys_alloc.c src/mem/page_table.c src/drivers/ata.c src/ui/terminal.c src/commands/commands.c src/commands/cd.c src/commands/ls.c src/commands/echo.c src/commands/help.c src/commands/exit.c src/commands/mem.c src/commands/readsector.c src/commands/info.c
+OBJS = src/boot.o src/kernel.o src/mem/multiboot.o src/mem/phys_alloc.o src/mem/page_table.o src/drivers/ata.o src/ui/terminal.o src/commands/commands.o src/commands/cd.o src/commands/ls.o src/commands/echo.o src/commands/help.o src/commands/exit.o src/commands/mem.o src/commands/readsector.o src/commands/info.o
 
 .PHONY: all clean run
 
@@ -38,6 +38,14 @@ src/mem/page_table.o: src/mem/page_table.c
 	@echo "Compilando $<..."
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+src/drivers/ata.o: src/drivers/ata.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/ui/terminal.o: src/ui/terminal.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 src/commands/commands.o: src/commands/commands.c
 	@echo "Compilando $<..."
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -59,6 +67,18 @@ src/commands/help.o: src/commands/help.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 src/commands/exit.o: src/commands/exit.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/mem.o: src/commands/mem.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/readsector.o: src/commands/readsector.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+src/commands/info.o: src/commands/info.c
 	@echo "Compilando $<..."
 	$(CC) $(CFLAGS) -c -o $@ $<
 

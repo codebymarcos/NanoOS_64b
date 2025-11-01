@@ -27,13 +27,11 @@ static inline int test_bit(uint64_t idx) {
 
 void phys_init(uint64_t start, uint64_t end) {
     if (end <= start) {
-        println("phys_init: região inválida");
         return;
     }
 
     uint64_t full_pages = (end - start) / 4096;
     if (full_pages == 0) {
-        println("phys_init: nenhuma página disponível");
         return;
     }
 
@@ -55,11 +53,6 @@ void phys_init(uint64_t start, uint64_t end) {
 
     /* limpar bitmap */
     for (uint64_t i = 0; i < bitmap_bytes; i++) bitmap[i] = 0;
-
-    println("phys_init: inicializado");
-    print(" phys base="); print_hex_u64(base);
-    print(" pages="); print_hex_u64(total_pages);
-    println("");
 }
 
 uint64_t phys_alloc_page(void) {
@@ -85,4 +78,17 @@ void phys_free_page(uint64_t paddr) {
     uint64_t idx = (paddr - base) / 4096;
     if (idx >= total_pages) return;
     clear_bit(idx);
+}
+
+uint64_t phys_get_total_pages(void) {
+    return total_pages;
+}
+
+uint64_t phys_get_free_pages(void) {
+    if (!bitmap || total_pages == 0) return 0;
+    uint64_t free = 0;
+    for (uint64_t idx = 0; idx < total_pages; idx++) {
+        if (!test_bit(idx)) free++;
+    }
+    return free;
 }

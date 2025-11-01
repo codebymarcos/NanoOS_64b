@@ -1,5 +1,7 @@
 // Kernel 64-bit - I/O serial
 
+#include "io.h"
+
 // Tipos básicos usando built-ins do GCC
 typedef __UINT8_TYPE__ uint8_t;
 typedef __UINT16_TYPE__ uint16_t;
@@ -8,18 +10,6 @@ typedef __UINT64_TYPE__ uint64_t;
 
 // Definições de portas
 #define COM1 0x3F8
-#define BUFFER_SIZE 50
-
-// Funções de I/O inline
-static inline void outb(uint16_t port, uint8_t val) {
-    __asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port) : "memory");
-}
-
-static inline uint8_t inb(uint16_t port) {
-    uint8_t ret;
-    __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port) : "memory");
-    return ret;
-}
 
 // Inicializa serial COM1
 int serial_init(void) {
@@ -80,78 +70,28 @@ void println(const char* str) {
     print("\r\n");
 }
 
-// Limpa buffer
-void clear_buffer(char* buffer, int size) {
-    for (int i = 0; i < size; i++) {
-        buffer[i] = 0;
-    }
-}
-
 // Kernel principal
 void kernel_main(uint64_t mb_info) {
-    // Inicializar serial para output
+    /* Inicializar serial para output */
     if (serial_init() != 0) {
-        // Serial falhou, mas não podemos nem avisar. Halt.
         while(1) __asm__ volatile("hlt");
     }
-    /* Inicializar subsistema de memória (recebe ponteiro multiboot) */
+    
+    /* Inicializar subsistema de memória */
     extern void mem_init(uint64_t mb_info);
     mem_init(mb_info);
     
-    // Banner do kernel
-    println("");
-    println("╔══════════════════════════════════════════╗");
-    println("║                KERNEL64                 ║");
-    println("║           Sistema Operacional           ║");
-    println("╚══════════════════════════════════════════╝");
-    println("");
-    println("Status: Operacional");
-    println("Arquitetura: x86_64");
-    println("Processador: Intel");
-    println("");
-    print("Digite algo (max 50 chars): ");
+    /* Inicializar driver ATA */
+    extern void ata_init(void);
+    ata_init();
     
-    // Buffer para input com proteção
-    char input[BUFFER_SIZE + 1];
-    int index = 0;
-    clear_buffer(input, BUFFER_SIZE + 1);
+    /* Inicializar e executar terminal */
+    extern void terminal_init(void);
+    extern void terminal_run(void);
     
-    // Loop principal de input
-    while (1) {
-        char c = serial_getchar();
-        
-        // Backspace ou Delete
-        if (c == 0x08 || c == 0x7F) {
-            if (index > 0) {
-                index--;
-                input[index] = '\0';
-                print("\b \b"); // Apagar caractere visualmente
-            }
-        }
-        // Enter ou Line Feed
-        else if (c == '\r' || c == '\n') {
-            input[index] = '\0';
-            print("\r\nVoce digitou: ");
-            print(input);
-            print("\r\n");
-            /* Executar comando */
-            extern int execute_command(const char *cmd_line);
-            execute_command(input);
-            clear_buffer(input, BUFFER_SIZE + 1);
-            index = 0;
-            print("Digite algo: ");
-        }
-        // Caractere imprimível
-        else if (c >= 32 && c <= 126) {
-            if (index < BUFFER_SIZE) {
-                input[index++] = c;
-                serial_putchar(c); // Echo
-            }
-            // Buffer cheio - ignorar silenciosamente
-        }
-        // Caracteres de controle ignorados
-    }
+    terminal_init();
+    terminal_run();
     
-    // Never reached
+    /* Nunca deve chegar aqui */
     while(1) __asm__ volatile("hlt");
 }
